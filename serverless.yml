@@ -1,0 +1,99 @@
+service: library-api
+
+provider:
+  name: aws
+  runtime: python3.11
+  region: us-east-1
+  stage: dev
+
+  environment:
+    BOOKS_TABLE: BooksTable
+    CONNECTIONS_TABLE: ConnectionsTable
+    WS_ENDPOINT:
+      Fn::Join:
+        - ""
+        - - "https://"
+          - Ref: WebsocketsApi
+          - ".execute-api."
+          - Ref: AWS::Region
+          - ".amazonaws.com/"
+          - ${self:provider.stage}
+
+  iam:
+    role: arn:aws:iam::${aws:accountId}:role/LabRole
+
+functions:
+  # WebSocket
+  wsConnect:
+    handler: handlers/websocket/connect.handler
+    events:
+      - websocket:
+          route: $connect
+
+  wsDisconnect:
+    handler: handlers/websocket/disconnect.handler
+    events:
+      - websocket:
+          route: $disconnect
+
+  # HTTP
+  getBooks:
+    handler: handlers/http/get_books.handler
+    events:
+      - http:
+          path: /books
+          method: get
+
+  createBook:
+    handler: handlers/http/create.handler
+    events:
+      - http:
+          path: /books
+          method: post
+
+  borrowBook:
+    handler: handlers/http/borrow.handler
+    events:
+      - http:
+          path: /books/{id}/borrow
+          method: post
+
+  returnBook:
+    handler: handlers/http/return_book.handler
+    events:
+      - http:
+          path: /books/{id}/return
+          method: post
+
+  deleteBook:
+    handler: handlers/http/delete.handler
+    events:
+      - http:
+          path: /books/{id}
+          method: delete
+
+resources:
+  Resources:
+    BooksTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: BooksTable
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: bookId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: bookId
+            KeyType: HASH
+
+    ConnectionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ConnectionsTable
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: connectionId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: connectionId
+            KeyType: HASH
