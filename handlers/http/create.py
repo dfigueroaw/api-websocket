@@ -16,7 +16,7 @@ def handler(event, context):
         "bookId": book_id,
         "title": title,
         "available": True,
-        "borrowedBy": None
+        "borrowedBy": None,
     }
 
     books_table.put_item(Item=book)

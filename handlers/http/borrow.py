@@ -11,11 +11,12 @@ def handler(event, context):
     if not borrowed_by:
         return response(400, "borrowedBy is required")
 
-    response = books_table.get_item(Key={"bookId": book_id})
-    if "Item" not in response:
+    res = books_table.get_item(Key={"bookId": book_id})
+    if "Item" not in res:
         return response(404, "Book not found")
 
-    book = response["Item"]
+    book = res["Item"]
+
     if not book.get("available", True):
         return response(409, "Book is already borrowed")
 
