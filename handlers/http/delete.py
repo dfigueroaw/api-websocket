@@ -1,6 +1,6 @@
-import json
 from common.aws import books_table
 from common.broadcast import broadcast
+from common.response import response
 
 def handler(event, context):
     book_id = event["pathParameters"]["id"]
@@ -12,7 +12,4 @@ def handler(event, context):
         "bookId": book_id
     })
 
-    return {
-        "statusCode": 204,
-        "body": ""
-    }
+    return response(204)

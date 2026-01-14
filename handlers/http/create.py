@@ -1,6 +1,7 @@
 import json
 from common.aws import books_table
 from common.broadcast import broadcast
+from common.response import response
 
 def handler(event, context):
     body = json.loads(event.get("body", "{}"))
@@ -9,10 +10,7 @@ def handler(event, context):
     title = body.get("title")
 
     if not book_id or not title:
-        return {
-            "statusCode": 400,
-            "body": "bookId and title are required"
-        }
+        return response(400, "bookId and title are required")
 
     book = {
         "bookId": book_id,
@@ -28,7 +26,4 @@ def handler(event, context):
         "book": book
     })
 
-    return {
-        "statusCode": 201,
-        "body": json.dumps(book)
-    }
+    return response(201, book)
