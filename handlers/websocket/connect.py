@@ -1,4 +1,3 @@
-import os
 from common.aws import connections_table
 
 def handler(event, context):
